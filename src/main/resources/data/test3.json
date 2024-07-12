@@ -1,0 +1,92 @@
+[
+  {
+    "Name": "Avinash",
+    "Course": "BCom",
+    "Subjects": {
+      "subject1": "Accountancy",
+      "subject2": "Economics",
+      "subject3": "Business Law"
+    }
+  },
+  {
+    "Name": "Bharath",
+    "Course": "MCom",
+    "Subjects": {
+      "subject1": "Financial Management",
+      "subject2": "Taxation",
+      "subject3": "Auditing"
+    }
+  },
+  {
+    "Name": "Chitra",
+    "Course": "LLB",
+    "Subjects": {
+      "subject1": "Constitutional Law",
+      "subject2": "Criminal Law",
+      "subject3": "Contract Law"
+    }
+  },
+  {
+    "Name": "Dinesh",
+    "Course": "LLM",
+    "Subjects": {
+      "subject1": "International Law",
+      "subject2": "Human Rights Law",
+      "subject3": "Environmental Law"
+    }
+  },
+  {
+    "Name": "Eshwar",
+    "Course": "BHM",
+    "Subjects": {
+      "subject1": "Food & Beverage Management",
+      "subject2": "Hospitality Operations",
+      "subject3": "Tourism Management"
+    }
+  },
+  {
+    "Name": "Fathima",
+    "Course": "MHM",
+    "Subjects": {
+      "subject1": "Hotel Management",
+      "subject2": "Event Management",
+      "subject3": "Culinary Arts"
+    }
+  },
+  {
+    "Name": "Gagan",
+    "Course": "BFA",
+    "Subjects": {
+      "subject1": "Drawing",
+      "subject2": "Painting",
+      "subject3": "Sculpture"
+    }
+  },
+  {
+    "Name": "Harini",
+    "Course": "MFA",
+    "Subjects": {
+      "subject1": "Photography",
+      "subject2": "Graphic Design",
+      "subject3": "Animation"
+    }
+  },
+  {
+    "Name": "Ishan",
+    "Course": "BSc",
+    "Subjects": {
+      "subject1": "Geology",
+      "subject2": "Geography",
+      "subject3": "Environmental Science"
+    }
+  },
+  {
+    "Name": "Janaki",
+    "Course": "MSc",
+    "Subjects": {
+      "subject1": "Biotechnology",
+      "subject2": "Microbiology",
+      "subject3": "Biochemistry"
+    }
+  }
+]
