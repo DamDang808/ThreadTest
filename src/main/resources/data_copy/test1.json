@@ -1,0 +1,170 @@
+[
+  {
+    "Name": "Yashraj",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Zainab",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Aakash",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Bhumika",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Chetan",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Divya",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Ekam",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Fatima",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Gyan",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Harshvardhan",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Ishan",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Janaki",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Kalyani",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Manya",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Neel",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Preeti",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Rohan",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Shivam",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Tarun",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Urvashi",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Vibhav",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Vishal",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Yumna",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Zaid",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  }
+]

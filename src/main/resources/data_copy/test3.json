@@ -1,0 +1,240 @@
+[
+  {
+    "Name": "Avinash",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Bhavya",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Chandra",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Dinesh",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Esha",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Farhan",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Gaurav",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Hema",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Ishita",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Jai",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Kavya",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Lakshya",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Manish",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Neha",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Omkar",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Priya",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Rahul",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Sahil",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Tanvi",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Umesh",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Omkar",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Priya",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Rahul",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Sahil",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Tanvi",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Umesh",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Varsha",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Xavi",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  },
+  {
+    "Name": "Yash",
+    "Course": "BA",
+    "subject1": "English",
+    "subject2": "History",
+    "subject3": "Political Science"
+  },
+  {
+    "Name": "Zeenat",
+    "Course": "BTech",
+    "subject1": "Computer Science",
+    "subject2": "Electrical Engineering",
+    "subject3": "Mechanical Engineering"
+  },
+  {
+    "Name": "Aarav",
+    "Course": "BCom",
+    "subject1": "Accountancy",
+    "subject2": "Economics",
+    "subject3": "Business Law"
+  },
+  {
+    "Name": "Bhuvan",
+    "Course": "BBA",
+    "subject1": "Marketing",
+    "subject2": "Finance",
+    "subject3": "Human Resource Management"
+  },
+  {
+    "Name": "Chitra",
+    "Course": "BSc",
+    "subject1": "Physics",
+    "subject2": "Chemistry",
+    "subject3": "Mathematics"
+  },
+  {
+    "Name": "Dheeraj",
+    "Course": "BCA",
+    "subject1": "Programming",
+    "subject2": "Data Structures",
+    "subject3": "Database Management"
+  }
+]
