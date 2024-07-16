@@ -26,6 +26,10 @@ public class Controller {
     @FXML
     private TextArea textArea;
 
+    private final String URL = "jdbc:mysql://localhost:3306/test";
+    private final String USER = "root";
+    private final String PASSWORD = "";
+
     @FXML
     protected void createFileButtonClick() {
         final String[] names = {"Raja", "Ravi", "Kiran", "Rahul", "Rajesh"};
@@ -40,13 +44,14 @@ public class Controller {
         File selectedFile = fC.showSaveDialog(null);
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             JSONObject innerObj = new JSONObject();
             innerObj.put("Name", names[(int) (Math.random() * 5)]);
             innerObj.put("subject1", subject1[(int) (Math.random() * 5)]);
             innerObj.put("subject2", subject2[(int) (Math.random() * 5)]);
             innerObj.put("subject3", subject3[(int) (Math.random() * 5)]);
             innerObj.put("Course", course[(int) (Math.random() * 5)]);
+
             if (selectedFile != null) {
                 try {
                     FileWriter fw = new FileWriter(selectedFile, true);
@@ -77,10 +82,10 @@ public class Controller {
                         if (files != null) {
                             for (File file : files) {
                                 insertDataToDB(file.getAbsolutePath());
-                                if (file.delete()) System.out.println("File deleted successfully");
+                                if (file.delete()) textArea.appendText("File deleted successfully\n");
                             }
                         }
-                        Thread.sleep(200);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         System.out.println(e.getMessage());
                         break;
@@ -104,7 +109,7 @@ public class Controller {
                         (String) obj.get("subject3"),
                         (String) obj.get("Course"));
                 textArea.appendText("File name: " + path + ": Line " + i.getAndIncrement() + "\n");
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (ParseException | InterruptedException e) {
                 System.out.println(e.getMessage());
             }
@@ -130,13 +135,9 @@ public class Controller {
     }
 
     private void insert(String name, String subject1, String subject2, String subject3, String course) {
-        final String url = "jdbc:mysql://localhost:3306/test";
-        final String user = "root";
-        final String password = "";
-
         try {
             // establish the connection
-            Connection con = DriverManager.getConnection(url, user, password);
+            Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
             // insert data
             String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)" + " values (?, ?, ?, ?, ?)";
 
@@ -159,9 +160,9 @@ public class Controller {
         for (int i = 0; i < 5; i++) {
             int finalI = i;
             Thread thread = new Thread(() -> {
-                for (long j = fileSize * finalI / 5; j < fileSize * (finalI + 1) / 5; j++) {
-                    char c = (char) buf.get((int) j);
-                    data[(int) j] = c;
+                for (long s = fileSize * finalI / 5; s < fileSize * (finalI + 1) / 5; s++) {
+                    char c = (char) buf.get((int) s);
+                    data[(int) s] = c;
                 }
             });
             thread.start();
@@ -169,12 +170,10 @@ public class Controller {
         synchronized (data) {
             try {
                 data.wait(2000);
-                System.out.println("Done");
             } catch (InterruptedException e) {
                 System.out.println(e.getMessage());
             }
         }
-
         return new String(data).split("\n");
     }
 }
