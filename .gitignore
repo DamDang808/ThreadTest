@@ -2,6 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+src/main/java/org/example/demo/Test.java
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -36,4 +37,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
-src/main/java/org/example/demo/Test.java
+
