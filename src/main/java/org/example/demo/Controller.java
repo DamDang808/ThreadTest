@@ -6,6 +6,8 @@ import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -14,6 +16,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller {
     @FXML
@@ -25,7 +28,6 @@ public class Controller {
 
     @FXML
     protected void createFileButtonClick() {
-        textArea.clear();
         final String[] names = {"Raja", "Ravi", "Kiran", "Rahul", "Rajesh"};
         final String[] subject1 = {"Accountancy", "Marketing", "Physics", "Programming", "English"};
         final String[] subject2 = {"Economics", "Finance", "Chemistry", "Mathematics", "History"};
@@ -34,9 +36,7 @@ public class Controller {
 
         FileChooser fC = new FileChooser();
         fC.setInitialDirectory(new File("src/main/resources/data"));
-        fC.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("TXT", "*.txt")
-        );
+        fC.getExtensionFilters().add(new FileChooser.ExtensionFilter("TXT", "*.txt"));
         File selectedFile = fC.showSaveDialog(null);
 
 
@@ -62,72 +62,74 @@ public class Controller {
     }
 
     @FXML
-    protected void chooseFileButtonClick() {
-        textArea.clear();
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File("src/main/resources/data"));
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json")
-        );
+    protected void chooseFolderButtonClick() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select a Folder");
+        directoryChooser.setInitialDirectory(new File("src/main/resources/data"));
+        File selectedDirectory = directoryChooser.showDialog(null);
 
-        List<File> selectedFiles = fileChooser.showOpenMultipleDialog(null);
-        if (selectedFiles != null) {
-            for (File file : selectedFiles) {
-                insertData(file.getPath());
+        DaemonFolder daemon = new DaemonFolder() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        File[] files = selectedDirectory.listFiles();
+                        if (files != null) {
+                            for (File file : files) {
+                                insertDataToDB(file.getAbsolutePath());
+                                if (file.delete()) System.out.println("File deleted successfully");
+                            }
+                        }
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                        break;
+                    }
+                }
             }
-        } else {
-            textArea.appendText("File selection cancelled.\n");
-        }
+        };
     }
 
     @FXML
-    private void insertData(String path) {
-        Thread thread = new Thread(() -> {
-            JSONArray json = readJSONFile(path);
-            AtomicInteger i = new AtomicInteger(1);
-            for (Object obj : json) {
-                insertToDatabase((String) ((JSONObject) obj).get("Name"),
-                        (String) ((JSONObject) obj).get("subject1"),
-                        (String) ((JSONObject) obj).get("subject2"),
-                        (String) ((JSONObject) obj).get("subject3"),
-                        (String) ((JSONObject) obj).get("Course"));
-                // Use Platform.runLater to safely update the UI from a different thread
-                Platform.runLater(() -> textArea.appendText("File name: " + path + ": Line " + i.getAndIncrement() + "\n"));
+    private void insertDataToDB(String path) {
+        String[] data = readFile(path);
+        JSONParser parser = new JSONParser();
+        AtomicInteger i = new AtomicInteger(1);
+        for (String s : data) {
+            try {
+                JSONObject obj = (JSONObject) parser.parse(s);
+                insert((String) obj.get("Name"),
+                        (String) obj.get("subject1"),
+                        (String) obj.get("subject2"),
+                        (String) obj.get("subject3"),
+                        (String) obj.get("Course"));
+                textArea.appendText("File name: " + path + ": Line " + i.getAndIncrement() + "\n");
+                Thread.sleep(500);
+            } catch (ParseException | InterruptedException e) {
+                System.out.println(e.getMessage());
             }
-            deleteFile(path);
-        });
-        thread.start();
-    }
-
-    private JSONArray readJSONFile(String path) {
-        //JSON parser object to parse read file
-        JSONParser jsonParser = new JSONParser();
-        JSONArray json = null;
-        StringBuilder stringBuilder = new StringBuilder();
-
-
-        try {
-            // Read file into a string
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-            String line;
-            String ls = System.lineSeparator();
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(ls);
-            }
-            // delete the last new line separator
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-            reader.close();
-
-            String content = stringBuilder.toString();
-            json = (JSONArray) jsonParser.parse(content);
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
         }
-        return json;
+
     }
 
-    private void insertToDatabase(String name, String subject1, String subject2, String subject3, String course) {
+    private String[] readFile(String path) {
+        String[] data = null;
+        try {
+            RandomAccessFile aFile = new RandomAccessFile(path, "r");
+            FileChannel inChannel = aFile.getChannel();
+            long fileSize = inChannel.size();
+            ByteBuffer buf = ByteBuffer.allocate((int) fileSize);
+            inChannel.read(buf);
+            buf.flip();
+            data = getDataFromFile(fileSize, buf);
+            inChannel.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return data;
+    }
+
+    private void insert(String name, String subject1, String subject2, String subject3, String course) {
         final String url = "jdbc:mysql://localhost:3306/test";
         final String user = "root";
         final String password = "";
@@ -135,12 +137,10 @@ public class Controller {
         try {
             // establish the connection
             Connection con = DriverManager.getConnection(url, user, password);
-
             // insert data
-            String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)"
-                    + " values (?, ?, ?, ?, ?)";
+            String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)" + " values (?, ?, ?, ?, ?)";
 
-            PreparedStatement preparedStmt = con.prepareStatement(sql);;
+            PreparedStatement preparedStmt = con.prepareStatement(sql);
             preparedStmt.setString(1, name);
             preparedStmt.setString(2, subject1);
             preparedStmt.setString(3, subject2);
@@ -150,16 +150,31 @@ public class Controller {
 
             con.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 
-    private void deleteFile(String path) {
-        File file = new File(path);
-        if (file.delete()) {
-            System.out.println("Deleted the file: " + file.getName());
-        } else {
-            System.out.println("Failed to delete the file.");
+    private String[] getDataFromFile(long fileSize, ByteBuffer buf) {
+        char[] data = new char[(int) fileSize];
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            Thread thread = new Thread(() -> {
+                for (long j = fileSize * finalI / 5; j < fileSize * (finalI + 1) / 5; j++) {
+                    char c = (char) buf.get((int) j);
+                    data[(int) j] = c;
+                }
+            });
+            thread.start();
         }
+        synchronized (data) {
+            try {
+                data.wait(2000);
+                System.out.println("Done");
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        return new String(data).split("\n");
     }
 }
