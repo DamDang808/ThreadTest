@@ -1,28 +1,23 @@
 package org.example.demo;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller {
     @FXML
-    private Button chooseFileButton;
+    private Button chooseFolderButton;
     @FXML
     private Button createFileButton;
     @FXML
@@ -37,7 +32,14 @@ public class Controller {
         final String[] subject3 = {"Business", "Management", "Biology", "Statistics", "Geography"};
         final String[] course = {"MCA", "MBA", "B.Tech", "BBA", "BCA"};
 
-        JSONArray arr = new JSONArray();
+        FileChooser fC = new FileChooser();
+        fC.setInitialDirectory(new File("src/main/resources/data"));
+        fC.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("TXT", "*.txt")
+        );
+        File selectedFile = fC.showSaveDialog(null);
+
+
         for (int i = 0; i < 10; i++) {
             JSONObject innerObj = new JSONObject();
             innerObj.put("Name", names[(int) (Math.random() * 5)]);
@@ -45,27 +47,18 @@ public class Controller {
             innerObj.put("subject2", subject2[(int) (Math.random() * 5)]);
             innerObj.put("subject3", subject3[(int) (Math.random() * 5)]);
             innerObj.put("Course", course[(int) (Math.random() * 5)]);
-            arr.add(innerObj);
-        }
-
-        FileChooser fC = new FileChooser();
-        fC.setInitialDirectory(new File("src/main/resources/data"));
-        fC.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json")
-        );
-        File selectedFile = fC.showSaveDialog(null);
-
-
-        if (selectedFile != null) {
-            try (BufferedWriter bw = Files.newBufferedWriter(selectedFile.toPath(), StandardCharsets.UTF_8)) {
-                bw.write(arr.toJSONString());
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (selectedFile != null) {
+                try {
+                    FileWriter fw = new FileWriter(selectedFile, true);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write(innerObj.toJSONString());
+                    bw.newLine();
+                    bw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        } else {
-            textArea.appendText("File creation cancelled.\n");
         }
-
     }
 
     @FXML
