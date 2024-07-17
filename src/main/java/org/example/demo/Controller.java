@@ -1,5 +1,6 @@
 package org.example.demo;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -9,13 +10,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller {
@@ -43,27 +51,25 @@ public class Controller {
         fC.getExtensionFilters().add(new FileChooser.ExtensionFilter("TXT", "*.txt"));
         File selectedFile = fC.showSaveDialog(null);
 
+        if (selectedFile == null) return;
+        try {
+            FileWriter fw = new FileWriter(selectedFile.getAbsolutePath(), true);
 
-        for (int i = 0; i < 100; i++) {
-            JSONObject innerObj = new JSONObject();
-            innerObj.put("Name", names[(int) (Math.random() * 5)]);
-            innerObj.put("subject1", subject1[(int) (Math.random() * 5)]);
-            innerObj.put("subject2", subject2[(int) (Math.random() * 5)]);
-            innerObj.put("subject3", subject3[(int) (Math.random() * 5)]);
-            innerObj.put("Course", course[(int) (Math.random() * 5)]);
+            for (int i = 0; i < 10000; i++) {
+                JSONObject innerObj = new JSONObject();
+                innerObj.put("Name", names[i % 5]);
+                innerObj.put("Subject1", subject1[i % 5]);
+                innerObj.put("Subject2", subject2[i % 5]);
+                innerObj.put("Subject3", subject3[i % 5]);
+                innerObj.put("Course", course[i % 5]);
 
-            if (selectedFile != null) {
-                try {
-                    FileWriter fw = new FileWriter(selectedFile, true);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    bw.write(innerObj.toJSONString());
-                    bw.newLine();
-                    bw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                fw.write(innerObj.toJSONString() + "\n");
             }
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     @FXML
@@ -72,108 +78,100 @@ public class Controller {
         directoryChooser.setTitle("Select a Folder");
         directoryChooser.setInitialDirectory(new File("src/main/resources/data"));
         File selectedDirectory = directoryChooser.showDialog(null);
-
-        DaemonFolder daemon = new DaemonFolder() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        File[] files = selectedDirectory.listFiles();
-                        if (files != null) {
-                            for (File file : files) {
-                                insertDataToDB(file.getAbsolutePath());
-                                if (file.delete()) textArea.appendText("File deleted successfully\n");
-                            }
+        if (selectedDirectory == null) return;
+        Thread mainThread = new Thread(() -> {
+            while (true) {
+                File[] files = selectedDirectory.listFiles();
+                if (files != null)
+                    for (File file : files) {
+                        insertDataToDB(file.getAbsolutePath());
+                        if (file.delete()) {
+                            Platform.runLater(() -> textArea.appendText("File deleted: " + file.getName() + "\n"));
                         }
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        System.out.println(e.getMessage());
-                        break;
                     }
-                }
             }
-        };
+        });
+        mainThread.start();
     }
 
-    @FXML
     private void insertDataToDB(String path) {
-        String[] data = readFile(path);
+        String[] data = readFile(path, 1024);
         JSONParser parser = new JSONParser();
         AtomicInteger i = new AtomicInteger(1);
-        for (String s : data) {
-            try {
-                JSONObject obj = (JSONObject) parser.parse(s);
-                insert((String) obj.get("Name"),
-                        (String) obj.get("subject1"),
-                        (String) obj.get("subject2"),
-                        (String) obj.get("subject3"),
-                        (String) obj.get("Course"));
-                textArea.appendText("File name: " + path + ": Line " + i.getAndIncrement() + "\n");
-                Thread.sleep(100);
-            } catch (ParseException | InterruptedException e) {
-                System.out.println(e.getMessage());
-            }
-        }
 
-    }
-
-    private String[] readFile(String path) {
-        String[] data = null;
+        long start = System.nanoTime();
         try {
-            RandomAccessFile aFile = new RandomAccessFile(path, "r");
-            FileChannel inChannel = aFile.getChannel();
-            long fileSize = inChannel.size();
-            ByteBuffer buf = ByteBuffer.allocate((int) fileSize);
-            inChannel.read(buf);
-            buf.flip();
-            data = getDataFromFile(fileSize, buf);
-            inChannel.close();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        return data;
-    }
-
-    private void insert(String name, String subject1, String subject2, String subject3, String course) {
-        try {
-            // establish the connection
             Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-            // insert data
             String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)" + " values (?, ?, ?, ?, ?)";
-
             PreparedStatement preparedStmt = con.prepareStatement(sql);
+            for (String s : data) {
+                JSONObject obj = (JSONObject) parser.parse(s);
+                insert(preparedStmt,
+                        (String) obj.get("Name"),
+                        (String) obj.get("Subject1"),
+                        (String) obj.get("Subject2"),
+                        (String) obj.get("Subject3"),
+                        (String) obj.get("Course"));
+                Platform.runLater(() -> textArea.setText("File name: " + path + ": Line " + i.getAndIncrement() + "\n"));
+            }
+            con.close();
+        } catch (ParseException | SQLException e) {
+            e.printStackTrace();
+        }
+        long end = System.nanoTime();
+        Platform.runLater(() -> textArea.appendText("Time taken: " + (end - start) / 1e6 + " ms\n"));
+    }
+
+    private void insert(PreparedStatement preparedStmt, String name, String subject1, String subject2, String subject3, String course) {
+        try {
             preparedStmt.setString(1, name);
             preparedStmt.setString(2, subject1);
             preparedStmt.setString(3, subject2);
             preparedStmt.setString(4, subject3);
             preparedStmt.setString(5, course);
-            preparedStmt.execute();
-
-            con.close();
+            preparedStmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private String[] getDataFromFile(long fileSize, ByteBuffer buf) {
-        char[] data = new char[(int) fileSize];
-        for (int i = 0; i < 5; i++) {
-            int finalI = i;
-            Thread thread = new Thread(() -> {
-                for (long s = fileSize * finalI / 5; s < fileSize * (finalI + 1) / 5; s++) {
-                    char c = (char) buf.get((int) s);
-                    data[(int) s] = c;
-                }
-            });
-            thread.start();
-        }
-        synchronized (data) {
-            try {
-                data.wait(2000);
-            } catch (InterruptedException e) {
-                System.out.println(e.getMessage());
+    // Read file using multiple buffer
+    private String[] readFile(String path, int batchSize) {
+        String[] data = null;
+        try (FileChannel fileChannel = FileChannel.open(Paths.get(path))) {
+            long fileSize = fileChannel.size();
+            // Define chunk size and number of threads
+            int numThreads = (int) Math.ceil((double) fileSize / batchSize);
+            data = new String[numThreads];
+            // Create thread pool
+            ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+            // Divide the file into chunks and submit tasks to read them
+            for (int i = 0; i < numThreads; i++) {
+                long start = (long) i * batchSize;
+                long end = Math.min(start + batchSize, fileSize);
+                createThread(fileChannel, executor, start, end, data, i);
             }
+            // Shut down the thread pool
+            executor.shutdown();
+            // Wait for all threads to finish
+            executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
-        return new String(data).split("\n");
+        return String.join("", data).split("\n");
+    }
+
+    private void createThread(FileChannel fileChannel, ExecutorService executor, long start, long end, String[] data, int idx) {
+        executor.execute(() -> {
+            try {
+                ByteBuffer buffer = ByteBuffer.allocate((int) (end - start));
+                fileChannel.read(buffer, start);
+                buffer.flip();
+                String chunk = StandardCharsets.UTF_8.decode(buffer).toString();
+                data[idx] = chunk;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
