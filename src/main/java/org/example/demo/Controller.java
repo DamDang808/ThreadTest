@@ -3,6 +3,7 @@ package org.example.demo;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -77,8 +78,10 @@ public class Controller {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select a Folder");
         directoryChooser.setInitialDirectory(new File("src/main/resources/data"));
+
         File selectedDirectory = directoryChooser.showDialog(null);
         if (selectedDirectory == null) return;
+
         Thread mainThread = new Thread(() -> {
             while (true) {
                 File[] files = selectedDirectory.listFiles();
@@ -89,6 +92,11 @@ public class Controller {
                             Platform.runLater(() -> textArea.appendText("File deleted: " + file.getName() + "\n"));
                         }
                     }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         mainThread.start();
@@ -102,28 +110,42 @@ public class Controller {
         long start = System.nanoTime();
         try {
             Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-            String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)" + " values (?, ?, ?, ?, ?)";
-            PreparedStatement preparedStmt = con.prepareStatement(sql);
+            AtomicInteger pos = new AtomicInteger();
+            AtomicInteger len = new AtomicInteger();
             for (String s : data) {
                 JSONObject obj = (JSONObject) parser.parse(s);
-                insert(preparedStmt,
+                insert(con,
                         (String) obj.get("Name"),
                         (String) obj.get("Subject1"),
                         (String) obj.get("Subject2"),
                         (String) obj.get("Subject3"),
                         (String) obj.get("Course"));
-                Platform.runLater(() -> textArea.setText("File name: " + path + ": Line " + i.getAndIncrement() + "\n"));
+                String announce = "Đường dẫn: " + path + ", Dòng: " + i + "\n";
+                if (i.get() == 1)
+                    Platform.runLater(() -> textArea.appendText(announce));
+                else {
+                    IndexRange range = new IndexRange(pos.get() - len.get() + 1, pos.get() + 1);
+                    Platform.runLater(() -> textArea.replaceText(range, announce));
+                }
+                Platform.runLater(() -> {
+                    pos.set(textArea.getText().lastIndexOf("\n"));
+                    len.set(announce.length());
+                    i.getAndIncrement();
+                });
+
             }
             con.close();
         } catch (ParseException | SQLException e) {
             e.printStackTrace();
         }
         long end = System.nanoTime();
-        Platform.runLater(() -> textArea.appendText("Time taken: " + (end - start) / 1e6 + " ms\n"));
+        Platform.runLater(() -> textArea.appendText("Thời gian thêm dữ liệu: " + (end - start) / 1e6 + " ms\n"));
     }
 
-    private void insert(PreparedStatement preparedStmt, String name, String subject1, String subject2, String subject3, String course) {
+    private void insert(Connection con, String name, String subject1, String subject2, String subject3, String course) {
         try {
+            String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)" + " values (?, ?, ?, ?, ?)";
+            PreparedStatement preparedStmt = con.prepareStatement(sql);
             preparedStmt.setString(1, name);
             preparedStmt.setString(2, subject1);
             preparedStmt.setString(3, subject2);
@@ -138,6 +160,7 @@ public class Controller {
     // Read file using multiple buffer
     private String[] readFile(String path, int batchSize) {
         String[] data = null;
+        long startTime = System.nanoTime();
         try (FileChannel fileChannel = FileChannel.open(Paths.get(path))) {
             long fileSize = fileChannel.size();
             // Define chunk size and number of threads
@@ -158,6 +181,8 @@ public class Controller {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        long endTime = System.nanoTime();
+        Platform.runLater(() -> textArea.appendText("Thời gian đọc data: " + (endTime - startTime) / 1e6 + " ms\n"));
         return String.join("", data).split("\n");
     }
 
