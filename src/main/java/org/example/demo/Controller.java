@@ -38,6 +38,7 @@ public class Controller {
     private final String URL = "jdbc:mysql://localhost:3306/test";
     private final String USER = "root";
     private final String PASSWORD = "";
+    private final int BATCHSIZE = 1024;
 
     @FXML
     protected void createFileButtonClick() {
@@ -87,9 +88,9 @@ public class Controller {
                 File[] files = selectedDirectory.listFiles();
                 if (files != null)
                     for (File file : files) {
-                        insertDataToDB(file.getAbsolutePath());
+                        insertDataToDatabase(file.getAbsolutePath());
                         if (file.delete()) {
-                            Platform.runLater(() -> textArea.appendText("File deleted: " + file.getName() + "\n"));
+                            Platform.runLater(() -> textArea.appendText("Đã xóa file: " + file.getName() + "\n"));
                         }
                     }
                 try {
@@ -102,58 +103,57 @@ public class Controller {
         mainThread.start();
     }
 
-    private void insertDataToDB(String path) {
-        String[] data = readFile(path, 1024);
-        JSONParser parser = new JSONParser();
-        AtomicInteger i = new AtomicInteger(1);
-
+    private void insertDataToDatabase(String path) {
         long start = System.nanoTime();
-        try {
-            Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = con.prepareStatement("INSERT INTO list (Name, Subject1, Subject2, Subject3, Course) VALUES (?, ?, ?, ?, ?)")) { // Assuming table and column names
+            JSONParser parser = new JSONParser();
+            String[] data = readFile(path, BATCHSIZE);
             AtomicInteger pos = new AtomicInteger();
             AtomicInteger len = new AtomicInteger();
-            for (String s : data) {
-                JSONObject obj = (JSONObject) parser.parse(s);
-                insert(con,
-                        (String) obj.get("Name"),
-                        (String) obj.get("Subject1"),
-                        (String) obj.get("Subject2"),
-                        (String) obj.get("Subject3"),
-                        (String) obj.get("Course"));
-                String announce = "Đường dẫn: " + path + ", Dòng: " + i + "\n";
-                if (i.get() == 1)
-                    Platform.runLater(() -> textArea.appendText(announce));
-                else {
-                    IndexRange range = new IndexRange(pos.get() - len.get() + 1, pos.get() + 1);
-                    Platform.runLater(() -> textArea.replaceText(range, announce));
-                }
-                Platform.runLater(() -> {
-                    pos.set(textArea.getText().lastIndexOf("\n"));
-                    len.set(announce.length());
-                    i.getAndIncrement();
-                });
 
+            for (int i = 0; i < data.length; i++) {
+                String s = data[i];
+                insert(parser, s, stmt);
+                updateUI(path, i, data, pos, len);
             }
-            con.close();
+
+            stmt.executeBatch(); // Execute the batch insert
         } catch (ParseException | SQLException e) {
             e.printStackTrace();
         }
+
         long end = System.nanoTime();
         Platform.runLater(() -> textArea.appendText("Thời gian thêm dữ liệu: " + (end - start) / 1e6 + " ms\n"));
     }
 
-    private void insert(Connection con, String name, String subject1, String subject2, String subject3, String course) {
-        try {
-            String sql = " insert into list (Name, Subject1, Subject2, Subject3, Course)" + " values (?, ?, ?, ?, ?)";
-            PreparedStatement preparedStmt = con.prepareStatement(sql);
-            preparedStmt.setString(1, name);
-            preparedStmt.setString(2, subject1);
-            preparedStmt.setString(3, subject2);
-            preparedStmt.setString(4, subject3);
-            preparedStmt.setString(5, course);
-            preparedStmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private void insert(JSONParser parser, String s, PreparedStatement stmt) throws ParseException, SQLException {
+        JSONObject obj = (JSONObject) parser.parse(s);
+
+        stmt.setString(1, (String) obj.get("Name"));
+        stmt.setString(2, (String) obj.get("Subject1"));
+        stmt.setString(3, (String) obj.get("Subject2"));
+        stmt.setString(4, (String) obj.get("Subject3"));
+        stmt.setString(5, (String) obj.get("Course"));
+        stmt.addBatch();
+    }
+
+    private void updateUI(String path, int i, String[] data, AtomicInteger pos, AtomicInteger len) {
+        // Update UI less frequently
+        if (i % 100 == 0 || i == data.length - 1) {
+            final int currentIndex = i;
+            Platform.runLater(() -> {
+                String announce = "Đường dẫn: " + path + ", Dòng: " + (currentIndex + 1) + "\n";
+                if (currentIndex == 0) {
+                    textArea.appendText(announce);
+                } else {
+                    IndexRange range = new IndexRange(pos.get() - len.get() + 1, pos.get() + 1);
+                    textArea.replaceText(range, announce);
+                }
+                pos.set(textArea.getText().lastIndexOf("\n"));
+                len.set(announce.length());
+            });
         }
     }
 
@@ -182,7 +182,7 @@ public class Controller {
             e.printStackTrace();
         }
         long endTime = System.nanoTime();
-        Platform.runLater(() -> textArea.appendText("Thời gian đọc data: " + (endTime - startTime) / 1e6 + " ms\n"));
+        Platform.runLater(() -> textArea.appendText("Thời gian đọc file: " + (endTime - startTime) / 1e6 + " ms\n"));
         return String.join("", data).split("\n");
     }
 
